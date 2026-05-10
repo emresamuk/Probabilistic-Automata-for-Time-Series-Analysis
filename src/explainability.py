@@ -1,0 +1,1 @@
+# PCA, Normalizasyon, Veri Bölme, SAX dönüşümü

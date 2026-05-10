@@ -1,0 +1,30 @@
+# 1. VERİ YOLLARI (Paths)
+data:
+  base_path: "data"
+  skab_path: "data/SKAB"
+  batadal_path: "data/BATADAL_dataset04.csv"
+
+# 2. VERİ BÖLME PARAMETRELERİ
+split:
+  skab_n_splits: 5        # GroupKFold için fold sayısı
+  batadal_train_ratio: 0.6 # %60 Eğitim
+  batadal_val_ratio: 0.2   # %20 Doğrulama
+  batadal_test_ratio: 0.2  # %20 Test
+
+# 3. OTOMATA MODELİ PARAMETRELERİ
+# (Bu değerleri 3, 4, 5, 6 olarak değiştirip deneyler yapacaksın)
+automata:
+  window_size: 4          # Kayan pencere (sliding window) boyutu
+  alphabet_size: 3        # SAX için harf/sembol sayısı (a, b, c gibi)
+
+# 4. DERİN ÖĞRENME PARAMETRELERİ (Sabit İsterler)
+deep_learning:
+  epochs: 50
+  batch_size: 32
+  patience: 5             # Early Stopping için bekleme süresi
+  seeds: [42, 123, 2026, 7, 999] # 5 farklı random seed kuralı
+
+# 5. GÜRÜLTÜ ANALİZİ
+noise:
+  gaussian_mean: 0
+  gaussian_std: 0.1       # Gürültü direnci testi için standart sapma
