@@ -49,3 +49,10 @@ def preprocess_for_models(df, target_column, drop_columns, scaler=None, pca=None
         X_pc1 = pca.transform(X_scaled)
     
     return X_scaled, X_pc1, y, scaler, pca
+
+def create_sequences(data, target, window_size):
+    X, y = [], []  # Burası bir Tab içeride olmalı
+    for i in range(len(data) - window_size):
+        X.append(data[i:(i + window_size)])
+        y.append(target[i + window_size])
+    return np.array(X), np.array(y)

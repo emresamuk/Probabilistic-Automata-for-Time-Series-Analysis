@@ -4,6 +4,10 @@ import json
 from src.preprocessing import load_and_combine_skab, preprocess_for_models
 from src.models import ProbabilisticAutomata
 from sklearn.model_selection import GroupKFold
+import numpy as np
+import tensorflow as tf
+from src.models import build_lstm_model, build_cnn_model
+from src.preprocessing import create_sequences
 
 def main():
     # 1. Konfigürasyonu Yükle
@@ -75,6 +79,43 @@ def main():
         
     except Exception as e:
         print(f"BATADAL hatası: {e}")
+
+   # 1. Ayarlar ve Seed Listesi
+    from src.preprocessing import create_sequences # Bunu buraya ekle
+    
+    seeds = [42, 123, 2026, 7, 999]
+    # 'config' artık burada tanınır çünkü main() fonksiyonunun içindeyiz
+    win_size = config['automata']['window_size'] 
+    all_results = []
+
+    print("\n--- Derin Öğrenme Modelleri Eğitimi Başlıyor ---")
+
+    for seed in seeds:
+        print(f"\n>>> Deney başlatılıyor - Seed: {seed}")
+        
+        tf.random.set_seed(seed)
+        np.random.seed(seed)
+        
+        # Veriyi DL formatına getir
+        X_train_dl, y_train_dl = create_sequences(X_skab_scaled[train_idx], y_skab.iloc[train_idx].values, win_size)
+        X_test_dl, y_test_dl = create_sequences(X_skab_scaled[test_idx], y_skab.iloc[test_idx].values, win_size)
+        
+        # 2. LSTM Modelini Kur ve Eğit
+        input_shape = (X_train_dl.shape[1], X_train_dl.shape[2])
+        model = build_lstm_model(input_shape)
+        
+        # Epoch sayısını test için 5 yapabilirsin, finalde 10-20 yaparsın
+        model.fit(X_train_dl, y_train_dl, epochs=5, batch_size=32, verbose=0)
+        
+        # 3. Değerlendirme
+        loss, acc = model.evaluate(X_test_dl, y_test_dl, verbose=0)
+        print(f"Seed {seed} için LSTM Doğruluğu: {acc:.4f}")
+        all_results.append(acc)
+
+    if all_results:
+        print(f"\n5 Deney Sonucu Ortalama Başarı: {np.mean(all_results):.4f}")
+
+# DİKKAT: main() fonksiyonu burada bitiyor (girinti en sola geliyor)
 
 if __name__ == "__main__":
     main()

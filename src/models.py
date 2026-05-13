@@ -1,6 +1,9 @@
 import numpy as np
 from pyts.approximation import SymbolicAggregateApproximation
 import Levenshtein # pip install python-Levenshtein komutu gerekebilir
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import LSTM, Dense, Dropout, Conv1D, MaxPooling1D, Flatten
 
 class ProbabilisticAutomata:
     def __init__(self, n_bins=3, window_size=4):
@@ -63,3 +66,24 @@ class ProbabilisticAutomata:
             })
             
         return path_prob, details
+
+def build_lstm_model(input_shape):
+        model = Sequential([
+        LSTM(64, input_shape=input_shape, return_sequences=False),
+        Dropout(0.2),
+        Dense(32, activation='relu'),
+        Dense(1, activation='sigmoid') # Anomali mi değil mi? (0-1)
+            ])
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+        return model
+
+def build_cnn_model(input_shape):
+        model = Sequential([
+        Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=input_shape),
+        MaxPooling1D(pool_size=2),
+        Flatten(),
+        Dense(50, activation='relu'),
+        Dense(1, activation='sigmoid')
+            ])
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+        return model
