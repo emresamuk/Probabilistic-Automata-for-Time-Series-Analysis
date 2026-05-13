@@ -30,13 +30,13 @@ class ProbabilisticAutomata:
     def find_nearest_state(self, unseen_state):
         """Unseen Pattern Yönetimi: Levenshtein algoritması [cite: 56]"""
         distances = {state: Levenshtein.distance(unseen_state, state) for state in self.states}
-        # En yakın (mesafesi en küçük) durumu bul
+     
         nearest_state = min(distances, key=distances.get)
         return nearest_state, distances[nearest_state]
 
     def predict_sequence_probability(self, sequence_indices):
         """Path Probability hesaplama [cite: 140, 149]"""
-        # Test verisini sembole çevir
+       
         test_sax = self.sax.transform(sequence_indices.reshape(1, -1))[0]
         
         path_prob = 1.0
@@ -49,12 +49,12 @@ class ProbabilisticAutomata:
             status = "seen"
             mapped_to = state
             
-            # Eğer durum eğitimde yoksa Levenshtein kullan
+           
             if state not in self.states:
                 status = "unseen"
                 mapped_to, dist = self.find_nearest_state(state)
             
-            # Geçiş olasılığını al, yoksa çok küçük bir değer ver 
+           
             prob = self.transitions.get(mapped_to, {}).get(next_state, 0.0001)
             path_prob *= prob
             
@@ -72,7 +72,7 @@ def build_lstm_model(input_shape):
         LSTM(64, input_shape=input_shape, return_sequences=False),
         Dropout(0.2),
         Dense(32, activation='relu'),
-        Dense(1, activation='sigmoid') # Anomali mi değil mi? (0-1)
+        Dense(1, activation='sigmoid') 
             ])
         model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         return model
