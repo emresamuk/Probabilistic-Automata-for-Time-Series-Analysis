@@ -1,6 +1,6 @@
 import numpy as np
 from pyts.approximation import SymbolicAggregateApproximation
-import Levenshtein # pip install python-Levenshtein komutu gerekebilir
+import Levenshtein  # pip install python-Levenshtein
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout, Conv1D, MaxPooling1D, Flatten
@@ -19,42 +19,45 @@ class ProbabilisticAutomata:
         for i in range(len(sequence) - self.window_size):
             state = "".join(sequence[i : i + self.window_size])
             next_state = "".join(sequence[i + 1 : i + 1 + self.window_size])
-            if state not in self.transitions: self.transitions[state] = {}
+            if state not in self.transitions: 
+                self.transitions[state] = {}
             self.transitions[state][next_state] = self.transitions[state].get(next_state, 0) + 1
             self.states.add(state)
+            
+        # Geçiş olasılıklarının frekans tabanlı hesaplanması
         for state, next_states in self.transitions.items():
             total_output = sum(next_states.values())
-            for ns in next_states: next_states[ns] /= total_output
+            for ns in next_states: 
+                next_states[ns] /= total_output
         print(f"Otomata eğitildi. Durum Sayısı: {len(self.states)}")
 
     def find_nearest_state(self, unseen_state):
-        """Unseen Pattern Yönetimi: Levenshtein algoritması [cite: 56]"""
+        """Unseen Pattern Yönetimi: Levenshtein algoritması ile en yakın durum eşlemesi"""
         distances = {state: Levenshtein.distance(unseen_state, state) for state in self.states}
-     
         nearest_state = min(distances, key=distances.get)
         return nearest_state, distances[nearest_state]
 
     def predict_sequence_probability(self, sequence_indices):
-        """Path Probability hesaplama [cite: 140, 149]"""
-       
+        """Path Probability ve Normalize Edilmiş Güven Skoru Hesaplama (Smoothing Entegre Edildi)"""
         test_sax = self.sax.transform(sequence_indices.reshape(1, -1))[0]
         
         path_prob = 1.0
         details = []
+        N = len(test_sax) - self.window_size
 
-        for i in range(len(test_sax) - self.window_size):
+        for i in range(N):
             state = "".join(test_sax[i : i + self.window_size])
             next_state = "".join(test_sax[i + 1 : i + 1 + self.window_size])
             
             status = "seen"
             mapped_to = state
             
-           
+            # Eğer durum eğitim verisinde yoksa Unseen Pattern Yönetimi tetiklenir
             if state not in self.states:
                 status = "unseen"
                 mapped_to, dist = self.find_nearest_state(state)
             
-           
+            # Frekans/Laplace Smoothing: Bilinmeyen veya sıfıra düşen geçişler için taban olasılık ataması
             prob = self.transitions.get(mapped_to, {}).get(next_state, 0.0001)
             path_prob *= prob
             
@@ -65,25 +68,28 @@ class ProbabilisticAutomata:
                 "transition_prob": prob
             })
             
-        return path_prob, details
+        # Güven Skoru (Confidence Score): Yol uzunluğuna göre geometrik ortalama ile normalizasyon
+        confidence_score = float(path_prob ** (1 / N)) if N > 0 else 0.0
+            
+        return path_prob, confidence_score, details
 
 def build_lstm_model(input_shape):
-        model = Sequential([
+    model = Sequential([
         LSTM(64, input_shape=input_shape, return_sequences=False),
         Dropout(0.2),
         Dense(32, activation='relu'),
         Dense(1, activation='sigmoid') 
-            ])
-        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-        return model
+    ])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    return model
 
 def build_cnn_model(input_shape):
-        model = Sequential([
+    model = Sequential([
         Conv1D(filters=64, kernel_size=3, activation='relu', input_shape=input_shape),
         MaxPooling1D(pool_size=2),
         Flatten(),
         Dense(50, activation='relu'),
         Dense(1, activation='sigmoid')
-            ])
-        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
-        return model
+    ])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    return model
