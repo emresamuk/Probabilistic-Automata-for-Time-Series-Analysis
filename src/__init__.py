@@ -1,1 +1,1 @@
-# Klasörü Python paketi yapar
+# Klasörü Python paketi yapar boş kalacak

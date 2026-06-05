@@ -68,7 +68,7 @@ class ProbabilisticAutomata:
                 "transition_prob": prob
             })
             
-        # Güven Skoru (Confidence Score): Yol uzunluğuna göre geometrik ortalama ile normalizasyon
+        # Güven Skoru : Yol uzunluğuna göre geometrik ortalama ile normalizasyon
         confidence_score = float(path_prob ** (1 / N)) if N > 0 else 0.0
             
         return path_prob, confidence_score, details

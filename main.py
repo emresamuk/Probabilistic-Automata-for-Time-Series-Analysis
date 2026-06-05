@@ -8,7 +8,7 @@ import numpy as np
 import tensorflow as tf
 from src.preprocessing import load_and_combine_skab, preprocess_for_models, create_sequences, add_gaussian_noise
 
-# Görselleştirme için gerekli kütüphaneler (pip install matplotlib seaborn)
+# Görselleştirme için gerekli kütüphaneler 
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import confusion_matrix
@@ -20,9 +20,7 @@ def main():
     with open("config/settings.yaml", "r", encoding="utf-8") as f:
         config = yaml.safe_load(f)
 
-    # ==============================================================================
     # 1. SKAB VERİ SETİ SÜRECİ
-    # ==============================================================================
     print("--- SKAB Veri İşleme ve Otomata Süreci Başlıyor ---")
     
     skab_df = load_and_combine_skab(config['data']['base_path'])
@@ -61,9 +59,7 @@ def main():
             }, indent=4))
         break 
 
-    # ==============================================================================
-    # 2. BATADAL VERİ SETİ SÜRECİ (Zaman Sıralı %60 - %20 - %20 ve Sızıntı Önleme)
-    # ==============================================================================
+    # 2. BATADAL VERİ SETİ SÜRECİ 
     print("\n--- BATADAL Veri İşleme ve Otomata Süreci Başlıyor ---")
     
     try:
@@ -110,9 +106,8 @@ def main():
     except Exception as e:
         print(f"BATADAL hatası: {e}")
 
-    # ==============================================================================
-    # 3. DERİN ÖĞRENME MODELLERİ EĞİTİMİ (ZORUNLU: LSTM vs 1D-CNN & EARLY STOPPING)
-    # ==============================================================================
+    
+    # 3. DERİN ÖĞRENME MODELLERİ EĞİTİMİ
     seeds = [42, 123, 2026, 7, 999]
     win_size = config['automata']['window_size'] 
     
@@ -184,9 +179,7 @@ def main():
     plt.close()
     print("\n[GÖRSEL KAYDEDİLDI]: outputs/confusion_matrix.png")
 
-    # ==============================================================================
-    # 4. GÜRÜLTÜ ANALİZİ (%10 GAUSSIAN NOISE)
-    # ==============================================================================
+    # 4. GÜRÜLTÜ ANALİZİ 
     print("\n--- Gürültü Analizi Başlatılıyor (%10 Noise) ---")
     X_test_noisy = add_gaussian_noise(X_test_dl, std=0.1)
     _, acc_noisy = lstm_model.evaluate(X_test_noisy, y_test_dl, verbose=0)
@@ -195,9 +188,7 @@ def main():
     print(f"Gürültülü Veri Başarısı: {acc_noisy:.4f}")
     print(f"Performans Kaybı: {lstm_results[-1] - acc_noisy:.4f}")
 
-    # ==============================================================================
-    # 5. GERÇEK İSTATİSTİKSEL TEST (ZORUNLU: LSTM vs 1D-CNN KARŞILAŞTIRMASI)
-    # ==============================================================================
+    # 5. GERÇEK İSTATİSTİKSEL TEST ( LSTM vs 1D-CNN KARŞILAŞTIRMASI)
     from scipy.stats import wilcoxon
     print("\n--- İstatistiksel Test (Wilcoxon Signed-Rank Test: LSTM vs CNN) ---")
     try:
@@ -210,9 +201,7 @@ def main():
     except Exception as e:
         print(f"Wilcoxon testi yürütülemedi (Sonuç varyansı yetersiz olabilir): {e}")
 
-    # ==============================================================================
     # 6. RUBRİK ZORUNLULUĞU: VII-A PARAMETRE VARYASYON ANALİZİ & GRAFİK ÜRETİMİ
-    # ==============================================================================
     print("\n" + "="*65)
     print("--- PARAMETRE VARYASYON ANALİZİ (WINDOW SIZE & ALPHABET SIZE) ---")
     print("="*65)
@@ -235,7 +224,7 @@ def main():
             
     print("="*65)
     
-    # 6.1 Parametre Duyarlılık Grafiği Çizimi (Sensitivity Plot)
+    # 6.1 Parametre Duyarlılık Grafiği Çizimi 
     df_plot = pd.DataFrame(plot_data)
     plt.figure(figsize=(9, 6))
     sns.lineplot(data=df_plot, x="Window Size", y="State Count", hue="Alphabet Size", marker="o", linewidth=2.5)

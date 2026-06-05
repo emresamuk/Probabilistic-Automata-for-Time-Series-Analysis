@@ -1,4 +1,4 @@
-# 1. VERİ YOLLARI (Paths)
+# 1. VERİ YOLLARI 
 data:
   base_path: "data"
   skab_path: "data/SKAB"
@@ -12,12 +12,11 @@ split:
   batadal_test_ratio: 0.2  # %20 Test
 
 # 3. OTOMATA MODELİ PARAMETRELERİ
-# (Bu değerleri 3, 4, 5, 6 olarak değiştirip deneyler yapacaksın)
 automata:
   window_size: 4          # Kayan pencere (sliding window) boyutu
   alphabet_size: 3        # SAX için harf/sembol sayısı (a, b, c gibi)
 
-# 4. DERİN ÖĞRENME PARAMETRELERİ (Sabit İsterler)
+# 4. DERİN ÖĞRENME PARAMETRELERİ 
 deep_learning:
   epochs: 50
   batch_size: 32
